@@ -13,16 +13,16 @@ import java.io.FileNotFoundException;
 
 
 public class Board extends Pane {
-    public Cell[][] cells = new Cell[9][9];
-    public  final int BLOCK_SIZE = 50;
-    int ClickCcount = 0;
-    int coordX;
-    int coordY;
-    Pawn[] pawn = new Pawn[8];
+    public Cell[][] cells = new Cell[9][9]; // массив клеток
+    public  final int BLOCK_SIZE = 50; // размер клетки
+    int ClickCcount = 0; //кол-во кликов
+    int coordX; // координата Х после клика
+    int coordY; // координата Y после клика
+    Figure[] figure = new Figure[8];
     Board() {
         boolean flag = true;
 
-
+// создание клаток
         for (int i = 0; i < 9; i++) {
             for(int j = 0; j <9; j++)
             {
@@ -79,8 +79,8 @@ public class Board extends Pane {
                 {
 
                     try {
-                        pawn[j-1] = new Pawn(j * BLOCK_SIZE, i * BLOCK_SIZE, true);
-                        this.getChildren().add(pawn[j-1]);
+                        figure[j-1] = new Pawn(j * BLOCK_SIZE, i * BLOCK_SIZE, true);
+                        this.getChildren().add(figure[j-1]);
 
                     } catch (FileNotFoundException e) {
                         e.printStackTrace();
@@ -103,17 +103,17 @@ public class Board extends Pane {
                     ClickCcount = 1;
                     System.out.println(coordX + " " + coordY);
                     for (int i = 0; i < 8; i++)
-                        if ((int) (pawn[i].iCoordY / 50) == coordY && (int) (pawn[i].iCoordX / 50) == coordX)
-                            pawn[i].Select(coordX, coordY, this);
+                        if ((int) (figure[i].iCoordY / 50) == coordY && (int) (figure[i].iCoordX / 50) == coordX)
+                            figure[i].Select(coordX, coordY, this);
 
 
                 } else {
                     for(int iSel = 0; iSel < 8; iSel++ )
-                        if(pawn[iSel].isSelected())
+                        if(figure[iSel].isSelected())
                         {
                             if(cells[coordY][coordX].isMove()) {
-                                pawn[iSel].move(coordX, coordY, this, pawn[iSel]);
-                                System.out.println(pawn[iSel].getId());
+                                figure[iSel].move(coordX, coordY, this);
+                                System.out.println(figure[iSel].getId());
                                 ClickCcount = 0;
                             }
                         }
@@ -194,8 +194,8 @@ abstract class Figure extends ImageView{
         this.selected = selected;
     }
 
-    abstract void move(int moveX, int moveY, Board board, Figure figure);
-
+    abstract void move(int moveX, int moveY, Board board);
+    abstract void Select (int X, int Y, Board board);
     public abstract boolean isFisrStep();
 }
 
@@ -229,16 +229,16 @@ class Pawn extends Figure{
     }
 
     @Override
-    void move(int moveX, int moveY, Board board, Figure figure) {
-        int X = (int)figure.getTranslateX() / 50;
-        int Y =(int)figure.getTranslateY() / 50;
+    void move(int moveX, int moveY, Board board) {
+        int X = (int)this.getTranslateX() / 50;
+        int Y =(int)this.getTranslateY() / 50;
         board.cells[Y][X].setEmpty(true);
-        figure.setTranslateX(moveX * 50 + 5);
-        figure.setTranslateY(moveY * 50 + 5);
-        figure.iCoordX = moveX * 50;
-        figure.iCoordY = moveY * 50;
+        this.setTranslateX(moveX * 50 + 5);
+        this.setTranslateY(moveY * 50 + 5);
+        this.iCoordX = moveX * 50;
+        this.iCoordY = moveY * 50;
         board.cells[moveY][moveX].setEmpty(true);
-        figure.toFront();
+        this.toFront();
         this.setFisrStep(false);
         for(int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
@@ -249,11 +249,11 @@ class Pawn extends Figure{
         }
 
     }
-
+    @Override
     void Select (int X, int Y, Board board)
     {
         for(int a = 0; a < 8; a++)
-            board.pawn[a].setSelected(false);
+            board.figure[a].setSelected(false);
         for(int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 board.cells[i][j].setMove(false);

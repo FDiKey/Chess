@@ -105,18 +105,16 @@ public class Board extends Pane {
                     for (int i = 0; i < 8; i++)
                         if ((int) (figure[i].iCoordY / 50) == coordY && (int) (figure[i].iCoordX / 50) == coordX)
                             figure[i].Select(coordX, coordY, this);
-
-
                 } else {
                     for(int iSel = 0; iSel < 8; iSel++ )
                         if(figure[iSel].isSelected())
                         {
                             if(cells[coordY][coordX].isMove()) {
                                 figure[iSel].move(coordX, coordY, this);
-                                System.out.println(figure[iSel].getId());
                                 ClickCcount = 0;
                             }
                         }
+                        ClickCcount = 0;
 
                 }
 
@@ -237,7 +235,7 @@ class Pawn extends Figure{
         this.setTranslateY(moveY * 50 + 5);
         this.iCoordX = moveX * 50;
         this.iCoordY = moveY * 50;
-        board.cells[moveY][moveX].setEmpty(true);
+        board.cells[moveY][moveX].setEmpty(false);
         this.toFront();
         this.setFisrStep(false);
         for(int i = 1; i < 9; i++) {
@@ -248,12 +246,15 @@ class Pawn extends Figure{
             }
         }
 
+
     }
     @Override
     void Select (int X, int Y, Board board)
     {
         for(int a = 0; a < 8; a++)
             board.figure[a].setSelected(false);
+
+
         for(int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 board.cells[i][j].setMove(false);
@@ -261,7 +262,12 @@ class Pawn extends Figure{
             }
         }
         this.setSelected(true);
-
+        if(!board.cells[Y+1][X-1].isEmpty() == true)
+        {
+            board.cells[Y+1][X-1].setMove(true);
+            board.cells[Y+1][X-1].setStrokeWidth(4);
+            board.cells[Y+1][X-1].setStroke(Color.RED);
+        }
         if(this.isFisrStep()) {
             for (int i = Y; i < Y + 3; i++) {
                 board.cells[i][X].setMove(true);

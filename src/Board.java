@@ -18,17 +18,23 @@ public class Board extends Pane {
     public Cell[][] cells = new Cell[9][9]; // массив клеток
     static final int BLOCK_SIZE = 50; // размер клетки
     static final int QOUNT_BLOCKS = 8;
+    boolean turn = true;
+    boolean cheh = false;
+    boolean mat = false;
     int ClickCcount = 0; //кол-во кликов
     int coordX; // координата Х после клика
     int coordY; // координата Y после клика
-    int[] Rast = {1,2,3,4,5,4,3,2,1};
-    int countFigure = 16;
-    Figure[] wight_figure = new Figure[countFigure];
-    Figure[] black_figure = new Figure[countFigure];
-    Board() {
+    int countFigure = 16; // Количество фигур с одной стороны
+    Figure[] wight_figure = new Figure[countFigure]; // белые фигуры
+    Figure[] black_figure = new Figure[countFigure]; // черные фигуры
+    Board()  {
 
-        initBoard();
-        initFigure();
+        initBoard(); // инициализация поля
+        initFigure(); // инициализация фигур
+
+        for(int i = 0; i < countFigure; i ++)
+            System.out.println(black_figure[i].iCoordY);
+
 
         this.setOnMouseClicked(MouseEvent -> {
             coordX = (int) MouseEvent.getX() / 50;
@@ -37,19 +43,18 @@ public class Board extends Pane {
                 if (ClickCcount == 0) {
                     ClickCcount = 1;
                     System.out.println(coordX + " " + coordY);
-
                     int eating = 0;
                     for(int i = 0; i < countFigure; i++ ) {
                         if (wight_figure[i].isSelected()) {
                             for (int aa = 0; aa < countFigure; aa++) {
-                                if (black_figure[aa].iCoordX == coordX * 50 && black_figure[aa].iCoordY == coordY * 50) {
+                                if (black_figure[aa].iCoordX == coordX * BLOCK_SIZE && black_figure[aa].iCoordY == coordY * BLOCK_SIZE) {
                                     wight_figure[i].eat(coordX, coordY, this);
                                     ClickCcount = 0;
                                 }
                             }
                         } else {
                             for (int d = 0; d < countFigure; d++)
-                                if ((int) (wight_figure[d].iCoordY / 50) == coordY && (int) (wight_figure[d].iCoordX / 50) == coordX)
+                                if ((int) (wight_figure[d].iCoordY / BLOCK_SIZE) == coordY && (int) (wight_figure[d].iCoordX / BLOCK_SIZE) == coordX)
                                     wight_figure[d].Select(coordX, coordY, this);
                         }
                     }
@@ -128,42 +133,139 @@ public class Board extends Pane {
     }
     }
     void initFigure() {
-        for (int i = 1; i <= QOUNT_BLOCKS; i++)
+        for (int i = 1; i <= QOUNT_BLOCKS; i++) {
             if (i < 3 || i > 6) {
                 for (int j = 1; j <= QOUNT_BLOCKS; j++) {
-                    if(i == 1 || i == 7) {
+                    if (i == 1 || i == 8) {
+                        boolean flag;
+                        if (i == 1) flag = true;
+                        else flag = false;
                         switch (j) {
                             case 1: {
+                                if(flag) {
+                                    wight_figure[j - 1] = new Rook(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(wight_figure[j - 1]);
+                                }else {
+                                    black_figure[j - 1] = new Rook(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(black_figure[j - 1]);
+                                }
+                                this.cells[i][j].setEmpty(false);
+                                this.cells[i][j].setFigure("Rook");
+                                break;
+                            }
+                            case 2: {
+                                if(flag) {
+                                    wight_figure[j - 1] = new Knight(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(wight_figure[j - 1]);
+                                }else {
+                                    black_figure[j - 1] = new Knight(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(black_figure[j - 1]);
+                                }
+                                this.cells[i][j].setEmpty(false);
+                                this.cells[i][j].setFigure("Knight");
+                                break;
+                            }
+                            case 3: {
+                                if(flag) {
+                                    wight_figure[j - 1] = new Bishop(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(wight_figure[j - 1]);
+                                }else {
+                                    black_figure[j - 1] = new Bishop(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(black_figure[j - 1]);
+                                }
+                                this.cells[i][j].setEmpty(false);
+                                this.cells[i][j].setFigure("Bishop");
+                                break;
+                            }
+                            case 4: {
+                                if(flag) {
+                                    wight_figure[j - 1] = new King(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(wight_figure[j - 1]);
+                                }else {
+                                    black_figure[j - 1] = new King(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(black_figure[j - 1]);
+                                }
 
+                                this.cells[i][j].setEmpty(false);
+                                this.cells[i][j].setFigure("King");
+                                break;
+                            }
+                            case 5: {
+                                if(flag) {
+                                    wight_figure[j - 1] = new Queen(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(wight_figure[j - 1]);
+                                }else {
+                                    black_figure[j - 1] = new Queen(j * BLOCK_SIZE, i * BLOCK_SIZE, flag);
+                                    this.getChildren().add(black_figure[j - 1]);
+                                }
+                                this.cells[i][j].setEmpty(false);
+                                this.cells[i][j].setFigure("Queen");
+                                break;
+                            }
+                            case 6: {
+                                if(flag) {
+                                    wight_figure[j - 1] = new Bishop(j * BLOCK_SIZE, i * BLOCK_SIZE, true);
+                                    this.getChildren().add(wight_figure[j - 1]);
+                                }else {
+                                    black_figure[j - 1] = new Bishop(j * BLOCK_SIZE, i * BLOCK_SIZE, false);
+                                    this.getChildren().add(black_figure[j - 1]);
+                                }
+                                this.cells[i][j].setEmpty(false);
+                                this.cells[i][j].setFigure("Bishop");
+                                break;
+                            }
+                            case 7: {
+                                if(flag) {
+                                    wight_figure[j - 1] = new Knight(j * BLOCK_SIZE, i * BLOCK_SIZE, true);
+                                    this.getChildren().add(wight_figure[j - 1]);
+                                    wight_figure[j - 1].toFront();
+                                }else {
+                                    black_figure[j - 1] = new Knight(j * BLOCK_SIZE, i * BLOCK_SIZE, false);
+                                    this.getChildren().add(black_figure[j - 1]);
+                                }
+                                this.cells[i][j].setEmpty(false);
+                                this.cells[i][j].setFigure("Knight");
+                                break;
+                            }
+                            case 8: {
+                                if(flag) {
+                                    wight_figure[j - 1] = new Rook(j * BLOCK_SIZE, i * BLOCK_SIZE, true);
+                                    this.getChildren().add(wight_figure[j - 1]);
+                                }else {
+                                    black_figure[j - 1] = new Rook(j * BLOCK_SIZE, i * BLOCK_SIZE, false);
+                                    this.getChildren().add(black_figure[j - 1]);
+                                }
+                                this.cells[i][j].setEmpty(false);
+                                this.cells[i][j].setFigure("Rook");
+                                break;
                             }
                         }
                     }
-                    try {
-                        wight_figure[j - 1] = new Pawn(j * BLOCK_SIZE, i * BLOCK_SIZE, true);
-                        this.getChildren().add(wight_figure[j - 1]);
-
-                    } catch (FileNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    cells[i][j].setEmpty(false);
-                    cells[i][j].setFigure("pawn");
-                    if (i == 7 && j > 0) // черные пешки
-                    {
-                        try {
-                            black_figure[j - 1] = new Pawn(j * BLOCK_SIZE + 5, i * BLOCK_SIZE + 5, false);
-                        } catch (FileNotFoundException e) {
-                            e.printStackTrace();
-                        }
-                        this.getChildren().add(black_figure[j - 1]);
-
-                        cells[i][j].setEmpty(false);
-                        cells[i][j].setFigure("pawn");
-                    }
                 }
             }
+        }
+        for (int iPawn = 8; iPawn < wight_figure.length; iPawn++) {
+            try {
+                wight_figure[iPawn] = new Pawn((iPawn - 7) * BLOCK_SIZE, 2 * BLOCK_SIZE, true);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            this.getChildren().add(wight_figure[iPawn]);
+            this.cells[2][(iPawn + 1)%8].setEmpty(true);
+            this.cells[2][(iPawn + 1)%8].setFigure("Pawn");
+
+            try {
+                black_figure[iPawn] = new Pawn((iPawn - 7) * BLOCK_SIZE, 7 * BLOCK_SIZE, false);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            this.getChildren().add(black_figure[iPawn]);
+            this.cells[7][(iPawn + 1)%8].setEmpty(false);
+            this.cells[7][(iPawn + 1)%8].setFigure("BlackPawn");
+        }
     }
 
-            }
+ }
 
 
 
@@ -236,6 +338,7 @@ abstract class Figure extends ImageView{
     abstract void eat(int coordX, int coordY, Board board);
 
 }
+
 class Pawn extends Figure{
     String name = "Pawn";
     int indexFigure;
@@ -250,7 +353,7 @@ class Pawn extends Figure{
     Pawn(int createX, int createY, boolean side) throws FileNotFoundException {
         if(side){
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\pawn.png"));
+                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\Pawn.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -271,8 +374,7 @@ class Pawn extends Figure{
         this.setTranslateY(createY+5);
         this.iCoordX = createX;
         this.iCoordY = createY;
-        this.setId("Pawn:" + createX / 50);
-        System.out.println(this.getId());
+        this.setId("Pawn:");
 
     }
 
@@ -288,12 +390,14 @@ class Pawn extends Figure{
         board.cells[moveY][moveX].setEmpty(false);
         this.toFront();
         this.setFisrStep(false);
+
         for(int i = 1; i < 9; i++) {
             for (int j = 1; j < 9; j++) {
                 board.cells[i][j].setMove(false);
                 board.cells[i][j].setStroke(board.cells[i][j].getFill());
             }
         }
+
         if(moveY == 8) {
             Pane pane = new Pane();
             pane.setMinSize(300,300);
@@ -305,7 +409,7 @@ class Pawn extends Figure{
                     if(this.iCoordX == board.wight_figure[i].iCoordX && this.iCoordY == board.wight_figure[i].iCoordY)
                     {
                         board.getChildren().removeAll(board.wight_figure[i]);
-                        board.wight_figure[i] = new Rook((int) this.getTranslateX(), (int) this.getTranslateY(), this.isbSide());
+                        board.wight_figure[i] = new Rook((int) this.getTranslateX() - 5, (int) this.getTranslateY() - 5, this.isbSide());
                         board.getChildren().add(board.wight_figure[i]);
                     }
                 }
@@ -328,58 +432,105 @@ class Pawn extends Figure{
     @Override
     void Select (int X, int Y, Board board) {
 
-        for(int a = 0; a < board.countFigure; a++)
-            board.wight_figure[a].setSelected(false);
+        if(this.isbSide()) {
+            for (int a = 0; a < board.countFigure; a++)
+                board.wight_figure[a].setSelected(false);
 
-
-        for(int i = 1; i < 9; i++) {
-            for (int j = 1; j < 9; j++) {
-                board.cells[i][j].setMove(false);
-                board.cells[i][j].setStroke(board.cells[i][j].getFill());
-            }
-        }
-        this.setSelected(true);
-        if(Y + 1 < 9) {
-        if(X + 1 < 9) {
-            for(int i = 0 ; i < board.countFigure ; i++)
-            {
-                if(board.black_figure[i].iCoordX == (X + 1) * 50  && board.black_figure[i].iCoordY == (Y + 1) * 50)
-                {
-                    board.cells[Y + 1][X + 1].setMove(true);
-                    board.cells[Y + 1][X + 1].setStrokeWidth(4);
-                    board.cells[Y + 1][X + 1].setStroke(Color.RED);
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    board.cells[i][j].setMove(false);
+                    board.cells[i][j].setStroke(board.cells[i][j].getFill());
                 }
             }
+            this.setSelected(true);
+            if (Y + 1 < 9) {
+                if (X + 1 < 9) {
+                    for (int i = 0; i < board.countFigure; i++) {
+                        if (board.black_figure[i].iCoordX == (X + 1) * 50 && board.black_figure[i].iCoordY == (Y + 1) * 50) {
+                            board.cells[Y + 1][X + 1].setMove(true);
+                            board.cells[Y + 1][X + 1].setStrokeWidth(4);
+                            board.cells[Y + 1][X + 1].setStroke(Color.RED);
+                        }
+                    }
+                }
+                for (int i = 0; i < board.countFigure; i++) {
+                    if (board.black_figure[i].iCoordX == (X - 1) * 50 && board.black_figure[i].iCoordY == (Y + 1) * 50) {
+                        board.cells[Y + 1][X - 1].setMove(true);
+                        board.cells[Y + 1][X - 1].setStrokeWidth(4);
+                        board.cells[Y + 1][X - 1].setStroke(Color.RED);
+                    }
+                }
             }
-            for(int i = 0 ; i < board.countFigure ; i++)
-            {
-                if(board.black_figure[i].iCoordX == (X - 1) * 50  && board.black_figure[i].iCoordY == (Y + 1) * 50)
-                {
-                    board.cells[Y + 1][X - 1].setMove(true);
-                    board.cells[Y + 1][X - 1].setStrokeWidth(4);
-                    board.cells[Y + 1][X - 1].setStroke(Color.RED);
+            if (Y < 8) {
+                if (this.isFisrStep()) {
+                    for (int i = Y + 1; i < Y + 3; i++) {
+                        if (board.cells[i][X].isEmpty()) {
+                            board.cells[i][X].setMove(true);
+                            board.cells[i][X].setStrokeWidth(4);
+                            board.cells[i][X].setStroke(Color.FORESTGREEN);
+                        } else break;
+                    }
+
+                } else {
+
+                    if (board.cells[Y + 1][X].isEmpty()) {
+                        board.cells[Y + 1][X].setMove(true);
+                        board.cells[Y + 1][X].setStrokeWidth(4);
+                        board.cells[Y + 1][X].setStroke(Color.FORESTGREEN);
+                    }
+
                 }
             }
         }
-        if(Y < 8){
-        if(this.isFisrStep()) {
-            for (int i = Y + 1; i < Y + 3; i++) {
-                if(board.cells[i][X].isEmpty()) {
-                    board.cells[i][X].setMove(true);
-                    board.cells[i][X].setStrokeWidth(4);
-                    board.cells[i][X].setStroke(Color.FORESTGREEN);
-                } else break;
-            }
+        else{
+            for (int a = 0; a < board.countFigure; a++)
+                board.black_figure[a].setSelected(false);
 
-        } else {
-
-                if(board.cells[Y+1][X].isEmpty()) {
-                    board.cells[Y+1][X].setMove(true);
-                    board.cells[Y+1][X].setStrokeWidth(4);
-                    board.cells[Y+1][X].setStroke(Color.FORESTGREEN);
+            for (int i = 1; i < 9; i++) {
+                for (int j = 1; j < 9; j++) {
+                    board.cells[i][j].setMove(false);
+                    board.cells[i][j].setStroke(board.cells[i][j].getFill());
                 }
+            }
+            this.setSelected(true);
+            if (Y + 1 < 9) {
+                if (X + 1 < 9) {
+                    for (int i = 0; i < board.countFigure; i++) {
+                        if (board.wight_figure[i].iCoordX == (X + 1) * 50 && board.wight_figure[i].iCoordY == (Y + 1) * 50) {
+                            board.cells[Y + 1][X + 1].setMove(true);
+                            board.cells[Y + 1][X + 1].setStrokeWidth(4);
+                            board.cells[Y + 1][X + 1].setStroke(Color.RED);
+                        }
+                    }
+                }
+                for (int i = 0; i < board.countFigure; i++) {
+                    if (board.wight_figure[i].iCoordX == (X - 1) * 50 && board.wight_figure[i].iCoordY == (Y + 1) * 50) {
+                        board.cells[Y - 1][X - 1].setMove(true);
+                        board.cells[Y - 1][X - 1].setStrokeWidth(4);
+                        board.cells[Y - 1][X - 1].setStroke(Color.RED);
+                    }
+                }
+            }
+            if (Y < 1) {
+                if (this.isFisrStep()) {
+                    for (int i = Y - 1; i < Y - 3; i--) {
+                        if (board.cells[i][X].isEmpty()) {
+                            board.cells[i][X].setMove(true);
+                            board.cells[i][X].setStrokeWidth(2);
+                            board.cells[i][X].setStroke(Color.FORESTGREEN);
+                        } else break;
+                    }
 
-        }
+                } else {
+
+                    if (board.cells[Y - 1][X].isEmpty()) {
+                        board.cells[Y - 1][X].setMove(true);
+                        board.cells[Y - 1][X].setStrokeWidth(2);
+                        board.cells[Y - 1][X].setStroke(Color.FORESTGREEN);
+                    }
+
+                }
+            }
         }
     }
     @Override
@@ -427,10 +578,10 @@ class Rook extends Figure{
             {
                 e.getStackTrace();
             }}
-        this.setTranslateX(createX);
-        this.setTranslateY(createY);
-        this.iCoordX = createX - 5;
-        this.iCoordY = createY - 5;
+        this.setTranslateX(createX + 5);
+        this.setTranslateY(createY + 5);
+        this.iCoordX = createX;
+        this.iCoordY = createY;
         this.setId("Rook:" + createX / 50);
         System.out.println(this.getId());
     }
@@ -453,7 +604,7 @@ class Rook extends Figure{
             }
         }
         this.setSelected(true);
-        System.out.println("Rook: " + this.iCoordY + " " + this.iCoordX);
+
 
     }
 
@@ -492,10 +643,10 @@ class Bishop extends Figure{
             {
                 e.getStackTrace();
             }}
-        this.setTranslateX(createX);
-        this.setTranslateY(createY);
-        this.iCoordX = createX - 5;
-        this.iCoordY = createY - 5;
+        this.setTranslateX(createX + 5);
+        this.setTranslateY(createY + 5);
+        this.iCoordX = createX;
+        this.iCoordY = createY;
         this.setId("Bishop:" + createX / 50);
         System.out.println(this.getId());
     }
@@ -543,6 +694,7 @@ class Knight extends Figure{
                 this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\Knight.png"));
                 this.setImage(image);
                 this.setbSide(side);
+                System.out.println("1111111111111111111111111111111111111111");
             }
             catch (Exception e)
             {
@@ -557,11 +709,12 @@ class Knight extends Figure{
             {
                 e.getStackTrace();
             }}
-        this.setTranslateX(createX);
-        this.setTranslateY(createY);
-        this.iCoordX = createX - 5;
-        this.iCoordY = createY - 5;
+        this.setTranslateX(createX + 5);
+        this.setTranslateY(createY + 5);
+        this.iCoordX = createX;
+        this.iCoordY = createY;
         this.setId("Knight:" + createX / 50);
+        this.toFront();
         System.out.println(this.getId());
     }
 
@@ -622,11 +775,11 @@ class King extends Figure{
             {
                 e.getStackTrace();
             }}
-        this.setTranslateX(createX);
-        this.setTranslateY(createY);
-        this.iCoordX = createX - 5;
-        this.iCoordY = createY - 5;
-        this.setId("Knight:" + createX / 50);
+        this.setTranslateX(createX + 5);
+        this.setTranslateY(createY + 5);
+        this.iCoordX = createX;
+        this.iCoordY = createY;
+        this.setId("King:" + createX / 50);
         System.out.println(this.getId());
     }
 
@@ -648,7 +801,7 @@ class King extends Figure{
             }
         }
         this.setSelected(true);
-        System.out.println("Knight: " + this.iCoordY + " " + this.iCoordX);
+        System.out.println("King: " + this.iCoordY + " " + this.iCoordX);
 
     }
 
@@ -687,10 +840,10 @@ class Queen extends Figure{
             {
                 e.getStackTrace();
             }}
-        this.setTranslateX(createX);
-        this.setTranslateY(createY);
-        this.iCoordX = createX - 5;
-        this.iCoordY = createY - 5;
+        this.setTranslateX(createX + 5);
+        this.setTranslateY(createY + 5);
+        this.iCoordX = createX;
+        this.iCoordY = createY;
         this.setId("Knight:" + createX / 50);
         System.out.println(this.getId());
     }

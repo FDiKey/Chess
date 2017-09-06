@@ -18,7 +18,7 @@ public class Board extends Pane {
     public Cell[][] cells = new Cell[9][9]; // массив клеток
     static final int BLOCK_SIZE = 50; // размер клетки
     static final int QOUNT_BLOCKS = 8;
-    boolean turn = true;
+    boolean turn = false;
     boolean cheh = false;
     boolean mat = false;
     int ClickCcount = 0; //кол-во кликов
@@ -31,50 +31,18 @@ public class Board extends Pane {
 
         initBoard(); // инициализация поля
         initFigure(); // инициализация фигур
-
-        for(int i = 0; i < countFigure; i ++)
-            System.out.println(black_figure[i].iCoordY);
-
-
         this.setOnMouseClicked(MouseEvent -> {
-            coordX = (int) MouseEvent.getX() / 50;
-            coordY = (int) MouseEvent.getY() / 50;
-            if(!cells[coordY][coordX].isEmpty()) ClickCcount = 0;
-                if (ClickCcount == 0) {
-                    ClickCcount = 1;
-                    System.out.println(coordX + " " + coordY);
-                    int eating = 0;
-                    for(int i = 0; i < countFigure; i++ ) {
-                        if (wight_figure[i].isSelected()) {
-                            for (int aa = 0; aa < countFigure; aa++) {
-                                if (black_figure[aa].iCoordX == coordX * BLOCK_SIZE && black_figure[aa].iCoordY == coordY * BLOCK_SIZE) {
-                                    wight_figure[i].eat(coordX, coordY, this);
-                                    ClickCcount = 0;
-                                }
-                            }
-                        } else {
-                            for (int d = 0; d < countFigure; d++)
-                                if ((int) (wight_figure[d].iCoordY / BLOCK_SIZE) == coordY && (int) (wight_figure[d].iCoordX / BLOCK_SIZE) == coordX)
-                                    wight_figure[d].Select(coordX, coordY, this);
-                        }
-                    }
-                    } else {
-                    for(int iSel = 0; iSel < countFigure; iSel++ )
-                        if(wight_figure[iSel].isSelected())
-                        {
-                            if(cells[coordY][coordX].isMove()) {
-                                wight_figure[iSel].move(coordX, coordY, this);
-                                ClickCcount = 0;
-                            }
-                        } else
-                            ClickCcount = 0;
-                    }
-});
+            if(turn) TurnSide(wight_figure, black_figure, MouseEvent);
+            else TurnSide(black_figure, wight_figure, MouseEvent);
+        });
+
+
+
 
 
     }
 
-    void initBoard(){ // создание доски
+    void initBoard() { // создание доски
     boolean flag =true;
         for (int i = 0; i < 9; i++) {
         for(int j = 0; j <9; j++)
@@ -251,7 +219,7 @@ public class Board extends Pane {
                 e.printStackTrace();
             }
             this.getChildren().add(wight_figure[iPawn]);
-            this.cells[2][(iPawn + 1)%8].setEmpty(true);
+            this.cells[2][(iPawn + 1)%8].setEmpty(false);
             this.cells[2][(iPawn + 1)%8].setFigure("Pawn");
 
             try {
@@ -264,10 +232,47 @@ public class Board extends Pane {
             this.cells[7][(iPawn + 1)%8].setFigure("BlackPawn");
         }
     }
+    void TurnSide(Figure f1[], Figure f2[], MouseEvent ME) {
+            //int iSel = 8;
+            coordX = (int) ME.getX() / 50;
+            coordY = (int) ME.getY() / 50;
+            if(!cells[coordY][coordX].isEmpty()) ClickCcount = 0;
+            if (ClickCcount == 0) {
+                ClickCcount = 1;
+                System.out.println(coordX + " " + coordY);
+                int eating = 0;
+                for(int i = 0; i < countFigure; i++ ) {
+                    if (f1[i].isSelected()) {
+                        for (int aa = 0; aa < countFigure; aa++) {
+                            if (f2[aa].iCoordX == coordX * BLOCK_SIZE && f2[aa].iCoordY == coordY * BLOCK_SIZE && this.cells[coordY][coordX].isMove()) {
+                                f1[i].eat(coordX, coordY, this);
+                                this.turn = !this.turn;
+                                ClickCcount = 0;
+                            }
+                        }
+                    } else {
+                        for (int d = 0; d < countFigure; d++)
+                            if ((int) (f1[d].iCoordY / BLOCK_SIZE) == coordY && (int) (f1[d].iCoordX / BLOCK_SIZE) == coordX)
+                                f1[d].Select(coordX, coordY, this);
+
+                    }
+                }
+            } else {
+                for(int iSel = 0; iSel < countFigure; iSel++ )
+                    if(f1[iSel].isSelected())
+                    {
+                        if(cells[coordY][coordX].isMove()) {
+                            f1[iSel].move(coordX, coordY, this);
+                            this.turn = !this.turn;
+                            ClickCcount = 0;
+                        }
+                    } else
+                        ClickCcount = 0;
+            }
+
+    }
 
  }
-
-
 
 class Cell extends Rectangle {
     public final int BLOCK_SIZE = 50;
@@ -310,9 +315,10 @@ class Cell extends Rectangle {
     }
 }
 
-abstract class Figure extends ImageView{
+abstract class Figure extends ImageView {
 
     private boolean bSide;
+    static final String url= "C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\";
     private boolean selected;
     int iCoordX;
     int iCoordY;
@@ -341,6 +347,7 @@ abstract class Figure extends ImageView{
 
 class Pawn extends Figure{
     String name = "Pawn";
+
     int indexFigure;
     private boolean FisrStep = true;
     public boolean isFisrStep() {
@@ -353,7 +360,7 @@ class Pawn extends Figure{
     Pawn(int createX, int createY, boolean side) throws FileNotFoundException {
         if(side){
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\Pawn.png"));
+                this.image = new Image(new FileInputStream(this.url+"Pawn.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -362,7 +369,7 @@ class Pawn extends Figure{
                 e.getStackTrace();}
         }else {
         try {
-            this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\Blackpawn.png"));
+            this.image = new Image(new FileInputStream(this.url+"Blackpawn.png"));
             this.setImage(image);
             this.setbSide(side);
         }
@@ -381,10 +388,10 @@ class Pawn extends Figure{
     @Override
     void move(int moveX, int moveY, Board board) {
         int X = (int)this.getTranslateX() / 50;
-        int Y =(int)this.getTranslateY() / 50;
+        int Y = (int)this.getTranslateY() / 50;
         board.cells[Y][X].setEmpty(true);
-        this.setTranslateX(moveX * 50 + 5);
-        this.setTranslateY(moveY * 50 + 5);
+        this.setTranslateX(moveX * 50);
+        this.setTranslateY(moveY * 50);
         this.iCoordX = moveX * 50;
         this.iCoordY = moveY * 50;
         board.cells[moveY][moveX].setEmpty(false);
@@ -398,21 +405,32 @@ class Pawn extends Figure{
             }
         }
 
-        if(moveY == 8) {
+        if(moveY == 8 || moveY == 1 ) {
             Pane pane = new Pane();
             pane.setMinSize(300,300);
             Button btn1 = new Button("ЛОДЬЯ");
             pane.getChildren().add(btn1);
             btn1.setOnMouseClicked(mouseEvent -> {
+
                 for(int i = 0; i < board.countFigure; i++)
                 {
+                    if (this.isbSide()) {
                     if(this.iCoordX == board.wight_figure[i].iCoordX && this.iCoordY == board.wight_figure[i].iCoordY)
                     {
                         board.getChildren().removeAll(board.wight_figure[i]);
                         board.wight_figure[i] = new Rook((int) this.getTranslateX() - 5, (int) this.getTranslateY() - 5, this.isbSide());
                         board.getChildren().add(board.wight_figure[i]);
                     }
+                    } else {
+                        if(this.iCoordX == board.black_figure[i].iCoordX && this.iCoordY == board.black_figure[i].iCoordY)
+                        {
+                            board.getChildren().removeAll(board.black_figure[i]);
+                            board.black_figure[i] = new Rook((int) this.getTranslateX() - 5, (int) this.getTranslateY() - 5, this.isbSide());
+                            board.getChildren().add(board.black_figure[i]);
+                        }
+                    }
                 }
+
                 this.toFront();
                 btn1.setVisible(false);
                 board.getChildren().remove(btn1);
@@ -443,6 +461,7 @@ class Pawn extends Figure{
                 }
             }
             this.setSelected(true);
+            System.out.println("Selected: "+this.getId());
             if (Y + 1 < 9) {
                 if (X + 1 < 9) {
                     for (int i = 0; i < board.countFigure; i++) {
@@ -481,72 +500,86 @@ class Pawn extends Figure{
 
                 }
             }
-        }
-        else{
-            for (int a = 0; a < board.countFigure; a++)
-                board.black_figure[a].setSelected(false);
+        }else{
+        for (int a = 0; a < board.countFigure; a++)
+            board.black_figure[a].setSelected(false);
 
-            for (int i = 1; i < 9; i++) {
-                for (int j = 1; j < 9; j++) {
-                    board.cells[i][j].setMove(false);
-                    board.cells[i][j].setStroke(board.cells[i][j].getFill());
-                }
-            }
-            this.setSelected(true);
-            if (Y + 1 < 9) {
-                if (X + 1 < 9) {
-                    for (int i = 0; i < board.countFigure; i++) {
-                        if (board.wight_figure[i].iCoordX == (X + 1) * 50 && board.wight_figure[i].iCoordY == (Y + 1) * 50) {
-                            board.cells[Y + 1][X + 1].setMove(true);
-                            board.cells[Y + 1][X + 1].setStrokeWidth(4);
-                            board.cells[Y + 1][X + 1].setStroke(Color.RED);
-                        }
-                    }
-                }
-                for (int i = 0; i < board.countFigure; i++) {
-                    if (board.wight_figure[i].iCoordX == (X - 1) * 50 && board.wight_figure[i].iCoordY == (Y + 1) * 50) {
-                        board.cells[Y - 1][X - 1].setMove(true);
-                        board.cells[Y - 1][X - 1].setStrokeWidth(4);
-                        board.cells[Y - 1][X - 1].setStroke(Color.RED);
-                    }
-                }
-            }
-            if (Y < 1) {
-                if (this.isFisrStep()) {
-                    for (int i = Y - 1; i < Y - 3; i--) {
-                        if (board.cells[i][X].isEmpty()) {
-                            board.cells[i][X].setMove(true);
-                            board.cells[i][X].setStrokeWidth(2);
-                            board.cells[i][X].setStroke(Color.FORESTGREEN);
-                        } else break;
-                    }
-
-                } else {
-
-                    if (board.cells[Y - 1][X].isEmpty()) {
-                        board.cells[Y - 1][X].setMove(true);
-                        board.cells[Y - 1][X].setStrokeWidth(2);
-                        board.cells[Y - 1][X].setStroke(Color.FORESTGREEN);
-                    }
-
-                }
+        for (int i = 1; i < 9; i++) {
+            for (int j = 1; j < 9; j++) {
+                board.cells[i][j].setMove(false);
+                board.cells[i][j].setStroke(board.cells[i][j].getFill());
             }
         }
+        this.setSelected(true);
+        System.out.println("Selected: " + this.getId());
+
+        for (int i = 0; i < board.countFigure; i++) {
+            if (board.wight_figure[i].iCoordX == (X + 1) * 50 && board.wight_figure[i].iCoordY == (Y - 1) * 50) {
+                board.cells[Y - 1][X + 1].setMove(true);
+                board.cells[Y - 1][X + 1].setStrokeWidth(4);
+                board.cells[Y - 1][X + 1].setStroke(Color.RED);
+            }
+        }
+
+        for (int i = 0; i < board.countFigure; i++) {
+            if (board.wight_figure[i].iCoordX == (X - 1) * 50 && board.wight_figure[i].iCoordY == (Y - 1) * 50) {
+                board.cells[Y - 1][X - 1].setMove(true);
+                board.cells[Y - 1][X - 1].setStrokeWidth(4);
+                board.cells[Y - 1][X - 1].setStroke(Color.RED);
+            }
+        }
+        if (Y > 1) {
+            int selY = Y;
+            if (this.isFisrStep()) {
+                if (board.cells[selY - 1][X].isEmpty()) {
+                    board.cells[selY - 1][X].setMove(true);
+                    board.cells[selY - 1][X].setStrokeWidth(4);
+                    board.cells[selY - 1][X].setStroke(Color.FORESTGREEN);
+                }
+                if (board.cells[selY - 2][X].isEmpty()) {
+                    board.cells[selY - 2][X].setMove(true);
+                    board.cells[selY - 2][X].setStrokeWidth(4);
+                    board.cells[selY - 2][X].setStroke(Color.FORESTGREEN);
+                }
+
+            } else {
+                if (board.cells[selY - 1][X].isEmpty()) {
+                    board.cells[selY - 1][X].setMove(true);
+                    board.cells[selY - 1][X].setStrokeWidth(4);
+                    board.cells[selY - 1][X].setStroke(Color.FORESTGREEN);
+                }
+            }
+        }
+    }
+
+
+
     }
     @Override
     void eat(int coordX, int coordY, Board board) {
         System.out.println("Eat :" + coordX +" " + coordY);
-        for(int i = 0; i < board.countFigure; i++)
-                    if ((int) (board.black_figure[i].iCoordY / 50) == coordY && (int) (board.black_figure[i].iCoordX / 50) == coordX)
-                    {
-                        board.cells[coordY][coordX].setEmpty(true);
-                        board.black_figure[i].iCoordX = 0;
-                        board.black_figure[i].iCoordY = 0;
-                        board.getChildren().removeAll(board.black_figure[i]);
-                        this.move(coordX, coordY, board);
-                    }
-
+        if(this.isbSide()) {
+            for (int i = 0; i < board.countFigure; i++)
+                if ((int) (board.black_figure[i].iCoordY / 50) == coordY && (int) (board.black_figure[i].iCoordX / 50) == coordX) {
+                    board.cells[coordY][coordX].setEmpty(true);
+                    board.black_figure[i].iCoordX = 0;
+                    board.black_figure[i].iCoordY = 0;
+                    board.getChildren().removeAll(board.black_figure[i]);
+                    this.move(coordX, coordY, board);
+                }
+        } else {
+            for (int i = 0; i < board.countFigure; i++)
+                if ((int) (board.wight_figure[i].iCoordY / 50) == coordY && (int) (board.wight_figure[i].iCoordX / 50) == coordX) {
+                    board.cells[coordY][coordX].setEmpty(true);
+                    board.wight_figure[i].iCoordX = 0;
+                    board.wight_figure[i].iCoordY = 0;
+                    board.getChildren().removeAll(board.wight_figure[i]);
+                    this.move(coordX, coordY, board);
+                }
+        }
+        //board.turn = !board.turn;
     }
+
     void retSide(int X, int Y, Board board) {
         for(int i = 0 ; i < board.countFigure ; i++)
         {
@@ -561,7 +594,7 @@ class Rook extends Figure{
     {
         if(side){
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\Rook.png"));
+                this.image = new Image(new FileInputStream(this.url + "Rook.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -570,7 +603,7 @@ class Rook extends Figure{
                 e.getStackTrace();}
         }else {
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\BlackRook.png"));
+                this.image = new Image(new FileInputStream(this.url + "BlackRook.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -593,6 +626,7 @@ class Rook extends Figure{
 
     @Override
     void Select(int X, int Y, Board board) {
+
         for(int a = 0; a < board.countFigure; a++)
             board.wight_figure[a].setSelected(false);
 
@@ -608,13 +642,10 @@ class Rook extends Figure{
 
     }
 
-
-
     @Override
     public boolean isFisrStep() {
         return false;
     }
-
     @Override
     void eat(int coordX, int coordY, Board board) {
 
@@ -626,7 +657,7 @@ class Bishop extends Figure{
     {
         if(side){
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\Bishop.png"));
+                this.image = new Image(new FileInputStream(this.url + "Bishop.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -635,7 +666,7 @@ class Bishop extends Figure{
                 e.getStackTrace();}
         }else {
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\BlackBishop.png"));
+                this.image = new Image(new FileInputStream(this.url + "BlackBishop.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -691,17 +722,17 @@ class Knight extends Figure{
     {
         if(side){
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\Knight.png"));
+                this.image = new Image(new FileInputStream(this.url + "Knight.png"));
                 this.setImage(image);
                 this.setbSide(side);
-                System.out.println("1111111111111111111111111111111111111111");
+
             }
             catch (Exception e)
             {
                 e.getStackTrace();}
         }else {
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\BlackKnight.png"));
+                this.image = new Image(new FileInputStream(this.url + "BlackKnight.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -758,7 +789,7 @@ class King extends Figure{
     {
         if(side){
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\King.png"));
+                this.image = new Image(new FileInputStream(this.url + "King.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -767,7 +798,7 @@ class King extends Figure{
                 e.getStackTrace();}
         }else {
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\BlackKing.png"));
+                this.image = new Image(new FileInputStream(this.url + "BlackKing.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -823,7 +854,7 @@ class Queen extends Figure{
     {
         if(side){
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\Queen.png"));
+                this.image = new Image(new FileInputStream(this.url + "Queen.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
@@ -832,7 +863,7 @@ class Queen extends Figure{
                 e.getStackTrace();}
         }else {
             try {
-                this.image = new Image(new FileInputStream("C:\\Users\\malyshev.ko\\IntelliJIDEAProjects\\tests\\res\\BlackQueen.png"));
+                this.image = new Image(new FileInputStream(this.url + "BlackQueen.png"));
                 this.setImage(image);
                 this.setbSide(side);
             }
